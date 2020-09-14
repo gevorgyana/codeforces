@@ -14,7 +14,7 @@ fn read_line_of_i32s() -> Vec<i32> {
 
 fn main() {
     let n = read_line_of_i32s()[0];
-    println!("{}", n);
+    // println!("{}", n);
 
     let mut tree: Vec<(i32, i32)> = vec![];
 
@@ -35,12 +35,18 @@ fn main() {
         }
     );
 
+    /*
     println!(
         "{:?}",
         tree
     );
+     */
 
-    // run bfs and collect the two most recent nodes
+    if tree.is_empty() {
+        println!("0");
+        return;
+    }
+
     let mut bfs: std::collections::VecDeque::<i32> =
         std::collections::VecDeque::new();
     let mut vis: std::collections::HashSet::<i32> =
@@ -60,13 +66,13 @@ fn main() {
     while !bfs.is_empty() {
         let x = bfs.pop_front().unwrap();
         vis.insert(x);
-        println!("just visited {}", x);
+        // println!("just visited {}", x);
         let mut advance = false;
         for i in &tree {
             if i.0 == x && !vis.contains(
                 &i.1
             ) {
-                println!("!val: {}", i.1);
+                // println!("!val: {}", i.1);
                 bfs.push_back(i.1);
                 vis.insert(i.1);
                 recent_lvls.last_mut().unwrap().push(i.1);
@@ -77,10 +83,31 @@ fn main() {
             recent_lvls.push(vec![]);
         }
     }
-
+    recent_lvls.pop();
+    /*
     println!(
         "{:?}",
         recent_lvls
     );
+     */
+    // can get the last 2 levels
+    let last = &recent_lvls[recent_lvls.len() - 1];
+    let pre_last = &recent_lvls[recent_lvls.len() - 2];
+    /*
+    println!(
+        "{:?}, {:?}",
+        pre_last,
+        last
+    );
+     */
 
+    if last.len() > 1 {
+        println!("{}",
+                 (recent_lvls.len() - 1) * 2
+        );
+    } else {
+        println!("{}",
+                 (recent_lvls.len() - 1) * 2 - 1
+        );
+    }
 }
