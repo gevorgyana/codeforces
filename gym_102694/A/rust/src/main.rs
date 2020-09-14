@@ -14,12 +14,13 @@ fn read_line_of_i32s() -> Vec<i32> {
 
 fn main() {
     let n = read_line_of_i32s()[0];
-    let mut tree: Vec<(i32, i32)> = vec![];
+    // it ugly but what can i do? i do not have the input in advance.
+    let mut tree: Vec<Vec<i32>> = vec![vec![]; 3 * 100000 + 1];
     for i in 0..n - 1 {
         // read the whole line
         let pair = read_line_of_i32s();
-        tree.push((pair[0], pair[1]));
-        tree.push((pair[1], pair[0]));
+        tree[pair[0] as usize].push(pair[1]);
+        tree[pair[1] as usize].push(pair[0]);
     }
 
     if n == 1 {
@@ -27,43 +28,38 @@ fn main() {
         return;
     }
 
-    /* Computationally no reason to sort unless you have upper/lower
-     * bounds which I do not have in Rust, and I don't want to implement
-     * that. So just use linear search thru the whole array, or allocate
-     * memory in advance (which is another thing I don't want to do).
-    tree.sort_by(
-        |a, b| {
-            a.0.cmp(&b.0)
-        }
-    );
-     */
-
     // Run a bfs and identify leaves
     let mut bfs = std::collections::VecDeque::<i32>::new();
     let mut vis = std::collections::HashSet::<i32>::new();
     let mut leaves: Vec<i32> = vec![];
     let mut node_level = std::collections::HashMap::<i32, i32>::new();
-    let root = tree[0].0;
+    let mut root = -1;
+    for i in &tree {
+        if !i.is_empty() {
+            root = i[0];
+            break;
+        }
+    }
     node_level.insert(root, 0);
     bfs.push_back(root);
     vis.insert(root);
     let mut level = 1;
+
     while !bfs.is_empty() {
         let current = bfs.pop_front().unwrap();
         let frozen_len = bfs.len();
-        for c in &tree {
-            if c.0 == current && !vis.contains(&c.1) {
-                // println!("{} -> {}", current, c.1);
-                vis.insert(c.1);
-                bfs.push_back(c.1);
-                node_level.insert(c.1, level);
-                /*
-                println!("assign {} to {}",
-                         level, c.1
-                );
-                 */
+        for c in &tree[current as usize] {
+            println!(
+                "{} -> {}",
+                current, c
+            );
+            if !vis.contains(&c) {
+                vis.insert(*c);
+                bfs.push_back(*c);
+                node_level.insert(*c, level);
             }
         }
+
         if bfs.len() == frozen_len {
             leaves.push(current);
         }
@@ -96,4 +92,5 @@ fn main() {
         "{}",
         (penmax_dist + max_dist) * 3
     );
+
 }
