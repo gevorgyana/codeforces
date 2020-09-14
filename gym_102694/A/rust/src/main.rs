@@ -26,117 +26,93 @@ fn main() {
             )
         );
     }
+
+    /* computationally no reason to sort unless you have upper/lower
+     * bounds which I do not have in Rust, and I don't want to implement
+     * that. So just use linear search thru the whole array, or allocate
+     * memory in advance (which is another thing I don't want to do).
     tree.sort_by(
         |a, b| {
             a.0.cmp(&b.0)
         }
     );
-    if tree.is_empty() {
-        println!("0");
-        return;
-    }
-    println!(
-        "{:?}",
-        tree
-    );
-    let mut bfs: std::collections::VecDeque::<i32> =
-        std::collections::VecDeque::new();
-    let mut vis: std::collections::HashSet::<i32> =
-        std::collections::HashSet::new();
-    vis.insert(
-        tree[0].0
-    );
-    bfs.push_back(
-        tree[0].0
-    );
-    let mut level: i32 = 0;
+     */
+
+    // run a bfs and identify parents and leaves
+    let mut bfs = std::collections::VecDeque::<i32>::new();
     let mut parent = std::collections::HashMap::<i32, i32>::new();
+    let mut vis = std::collections::HashSet::<i32>::new();
+    let mut leaves: Vec<i32> = vec![];
+    let root = tree[0].0;
+    bfs.push_back(
+        root
+    );
+    vis.insert(root);
     while !bfs.is_empty() {
-        let x = bfs.pop_front().unwrap();
-        vis.insert(x);
-        for i in &tree {
-            if i.0 == x && !vis.contains(
-                &i.1
-            ) {
-                bfs.push_back(i.1);
-                vis.insert(i.1);
+        let current = bfs.pop_front().unwrap();
+        let frozen_len = bfs.len();
+        for c in &tree {
+            if c.0 == current && !vis.contains(&c.1) {
+                println!("{} -> {}", current, c.1);
+                vis.insert(c.1);
+                bfs.push_back(c.1);
                 parent.insert(
-                    i.1,
-                    x,
+                    c.1, c.0
                 );
             }
         }
+        if bfs.len() == frozen_len {
+            leaves.push(
+                current
+            );
+        }
     }
-    println!(
-        "{:?}",
-        parent
-    );
     vis = std::collections::HashSet::new();
-    let mut reach = std::collections::HashMap::<i32, i32>::new();
-    for (start_from, _) in &tree {
-        println!(
-            "started from {}",
-            start_from
-        );
-        let mut e = *start_from;
-        let mut trail: Vec<i32> = vec![];
-        while parent.contains_key(&e) && !vis.contains(&e) {
-            trail.push(e);
-            vis.insert(e);
-            e = parent[&e];
-        }
-        println!(
-            "reach {:?}",
-            reach
-        );
-        println!("the trail {:?}", trail);
-
-        // if root
-        if trail.len() == 0 {
-            reach.insert(e, 0);
-        }
-
-        // traverse the trail & fill in the gaps
-        for (ind, rval) in trail.iter().rev().enumerate() {
-            println!(
-                "ind {} : rval {}",
-                ind, rval
-            );
-            if !reach.contains_key(rval) {
-                reach.insert(*rval, 0);
-            }
-            println!(
-                "adding {} and {} to {}",
-                ind + 1,
-                reach[&parent[trail.last().unwrap()]],
-                rval,
-            );
-            *reach.get_mut(rval).unwrap()
-                += reach[&parent[trail.last().unwrap()]]
-                + ind as i32 + 1;
-        }
-    }
     println!(
         "{:?}",
-        reach
+        leaves
+    );
+
+    // distance from a node to the root
+    let mut local_dist = std::collections::HashMap::<i32, i32>::new();
+
+    let mut max_dist: i32 = 0;
+    let mut penmax_dist: i32 = 0;
+
+    for l in &leaves {
+        let mut current = *l;
+        let mut path_len = 0;
+        while parent.contains_key(&current) && !vis.contains(&current) {
+            vis.insert(current);
+            current = parent[&current];
+            local_dist.insert(
+                current,
+                path_len
+            );
+            path_len += 1;
+        }
+
+        println!("current leave-root distance {}",
+                 path_len + local_dist[&current]
+        );
+
+        // store only the last 2 maximal values
+        let mut temp_vec = vec![
+            local_dist[&current] + path_len,
+            penmax_dist, max_dist,
+        ];
+
+        temp_vec.sort();
+        penmax_dist = temp_vec[1];
+        max_dist = temp_vec[2];
+    }
+
+    println!("{:?}",
+             local_dist
     );
 
     println!(
-        "the reach {:?}",
-        reach
+        "answer : {}",
+        penmax_dist + max_dist
     );
-
-    let capacity = reach.iter().len();
-    if capacity > 1 {
-        println!(
-            "{}",
-            reach.values().nth(capacity - 1)
-                + reach.values().nth(capacity - 2)
-        );
-    } else {
-        println!(
-            "{}",
-
-        );
-    }
 }
