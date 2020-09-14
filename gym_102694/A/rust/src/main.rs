@@ -84,16 +84,18 @@ fn main() {
         let mut path_len = 0;
         while parent.contains_key(&current) && !vis.contains(&current) {
             vis.insert(current);
-            current = parent[&current];
             local_dist.insert(
                 current,
                 path_len
             );
             path_len += 1;
+            current = parent[&current];
         }
 
+        println!("current {}", current);
         println!("current leave-root distance {}",
-                 path_len + local_dist[&current]
+                 path_len +
+                 local_dist.get(&current).unwrap_or(&0)
         );
 
         // store only the last 2 maximal values
