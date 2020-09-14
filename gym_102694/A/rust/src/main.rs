@@ -34,46 +34,59 @@ fn main() {
     let mut leaves: Vec<i32> = vec![];
     let mut node_level = std::collections::HashMap::<i32, i32>::new();
     let mut root = -1;
-    for i in &tree {
-        if !i.is_empty() {
-            root = i[0];
+    for (i, val) in tree.iter().enumerate() {
+        if !val.is_empty() {
+            root = i as i32;
             break;
         }
     }
+    println!(
+        "root {}",
+        root
+    );
     node_level.insert(root, 0);
     bfs.push_back(root);
     vis.insert(root);
-    let mut level = 1;
 
     while !bfs.is_empty() {
+
+        println!(
+            "bfs {:?}",
+            bfs
+        );
+
         let current = bfs.pop_front().unwrap();
         let frozen_len = bfs.len();
         for c in &tree[current as usize] {
-            println!(
-                "{} -> {}",
-                current, c
-            );
             if !vis.contains(&c) {
+
+                /*
+                println!(
+                    "{} -> {}",
+                    current, c
+                );
+                 */
+
                 vis.insert(*c);
                 bfs.push_back(*c);
-                node_level.insert(*c, level);
+                let prev_level = node_level[&current];
+                node_level.insert(*c, prev_level + 1);
             }
         }
 
         if bfs.len() == frozen_len {
             leaves.push(current);
         }
-        level += 1;
+
     }
-    /*
+
     println!(
-        "{:?}",
+        "leaves {:?}",
         leaves
     );
-    println!("{:?}",
+    println!("node_level {:?}",
              node_level
     );
-     */
 
     let mut max_dist: i32 = 0;
     let mut penmax_dist: i32 = 0;
