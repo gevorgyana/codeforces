@@ -22,18 +22,15 @@ fn main() {
         tree[pair[0] as usize].push(pair[1]);
         tree[pair[1] as usize].push(pair[0]);
     }
-
     if n == 1 {
         println!("0");
         return;
     }
-
     // Run a bfs and identify leaves
     let mut bfs = std::collections::VecDeque::<i32>::new();
     let mut vis = std::collections::HashSet::<i32>::new();
     // will later be used as a queue => therefore VecDeque
     let mut leaves = std::collections::VecDeque::<i32>::new();
-    let mut node_level = std::collections::HashMap::<i32, i32>::new();
     let mut root = -1;
     for (i, val) in tree.iter().enumerate() {
         if !val.is_empty() {
@@ -41,44 +38,22 @@ fn main() {
             break;
         }
     }
-    println!(
-        "root {}",
-        root
-    );
-    node_level.insert(root, 0);
     bfs.push_back(root);
     vis.insert(root);
-
     while !bfs.is_empty() {
-
-        println!(
-            "bfs {:?}",
-            bfs
-        );
-
         let current = bfs.pop_front().unwrap();
         let frozen_len = bfs.len();
         for c in &tree[current as usize] {
             if !vis.contains(&c) {
-
-                println!(
-                    "{} -> {}",
-                    current, c
-                );
-
                 vis.insert(*c);
                 bfs.push_back(*c);
-                let prev_level = node_level[&current];
-                node_level.insert(*c, prev_level + 1);
             }
         }
-
         if bfs.len() == frozen_len {
             leaves.push_back(current);
         }
     }
     vis = std::collections::HashSet::new();
-
     if tree[root as usize].len() == 1 {
         leaves.push_back(
             root
@@ -87,43 +62,50 @@ fn main() {
     println!("leaves {:?}",
              leaves
     );
-    let mut max_dist: i32 = 0;
-    let mut penmax_dist: i32 = 0;
+
+    // second pass
+
     let mut num_visited: i32 = 0;
+    let mut leaf_path = std::collections::HashMap::<i32, i32>::new();
+    let mut collect_center: bool = false;
+    let mut diam_leaves: Vec<i32> = vec![0, 0];
+
     for l in &leaves {
         vis.insert(*l);
+        leaf_path.insert(*l, 0);
     }
     num_visited += leaves.len() as i32;
-    println!("---");
-    let mut center: Vec<i32> = vec![];
+    if num_visited > n - 3 { collect_center = true; }
+
     while !leaves.is_empty() {
         let current = leaves.pop_front().unwrap();
-        println!("current {}", current);
-        println!("bfs {:?}", leaves);
         for next in &tree[current as usize] {
             if !vis.contains(&next) {
-                // collect the central nodes
-                if num_visited > n - 3 {
-                    center.push(*next);
+
+                leaf_path.insert(*next,
+                                 leaf_path[&current]
+                );
+
+                if collect_center == true {
+                    diam_leaves.push(leaf_path[&current]);
+                    println!("the size of the vec {}", diam_leaves.len());
+                    diam_leaves.swap(0, 2);
+                    diam_leaves.pop();
                 }
+
                 vis.insert(*next);
                 num_visited += 1;
                 bfs.push_back(*next);
-                println!("{} -> {}",
-                         current,
-                         next
-                );
+                println!("{} -> {}", current, next);
+
+                if num_visited > n - 3 {
+                    // the next nodes are going to be central
+                    collect_center = true;
+                }
+
             }
         }
     }
-
-    println!("the center {:?}",
-             center
-    );
-
-    println!(
-        "{}",
-        (penmax_dist + max_dist) * 3
-    );
-
+    vis = std::collections::HashSet::new();
+    println!("{}", (diam_leaves[0] + diam_leaves[1]) * 3);
 }
