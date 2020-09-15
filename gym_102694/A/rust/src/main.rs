@@ -59,9 +59,6 @@ fn main() {
             root
         );
     }
-    println!("leaves {:?}",
-             leaves
-    );
 
     // second pass
 
@@ -78,27 +75,61 @@ fn main() {
     if num_visited > n - 3 { collect_center = true; }
 
     while !leaves.is_empty() {
+
+        println!(
+            "leaves {:?}",
+            leaves
+        );
+
         let current = leaves.pop_front().unwrap();
+        println!(
+            "current {}",
+            current
+        );
         for next in &tree[current as usize] {
             if !vis.contains(&next) {
 
+                println!(
+                    "{} -> {}",
+                    current,
+                    next
+                );
+
                 leaf_path.insert(*next,
-                                 leaf_path[&current]
+                                 leaf_path[&current] + 1
                 );
 
                 if collect_center == true {
-                    diam_leaves.push(leaf_path[&current]);
-                    println!("the size of the vec {}", diam_leaves.len());
+
+                    println!(
+                        "new guy pushed to diam_leave {}",
+                        leaf_path[&next]
+                    );
+
+                    println!("diam_leaves before processing {:?}",
+                             diam_leaves
+                    );
+
+                    diam_leaves.push(leaf_path[&next]);
+                    diam_leaves.sort();
                     diam_leaves.swap(0, 2);
                     diam_leaves.pop();
+
+                    println!("diam_leaves after processing {:?}",
+                             diam_leaves
+                    );
                 }
 
                 vis.insert(*next);
                 num_visited += 1;
                 bfs.push_back(*next);
-                println!("{} -> {}", current, next);
 
                 if num_visited > n - 3 {
+
+                    println!(
+                        "number of visited nodes reached the threshold"
+                    );
+
                     // the next nodes are going to be central
                     collect_center = true;
                 }
@@ -106,6 +137,13 @@ fn main() {
             }
         }
     }
-    vis = std::collections::HashSet::new();
-    println!("{}", (diam_leaves[0] + diam_leaves[1]) * 3);
+    println!(
+        "leaf path {:?}",
+        leaf_path
+    );
+    println!(
+        "diam leaves {:?}",
+        diam_leaves
+    );
+    println!(" the result {}", (diam_leaves[0] + diam_leaves[1]) * 3);
 }
