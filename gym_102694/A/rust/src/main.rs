@@ -55,95 +55,100 @@ fn main() {
     }
     vis = std::collections::HashSet::new();
     if tree[root as usize].len() == 1 {
+        // println!("root is a leaf too");
         leaves.push_back(
             root
         );
     }
+    /*
+    println!("leaves {:?}",
+             leaves
+    );
+     */
 
     // second pass
+    // find the center, then move from the center to the leaves and
+    // measure the distance, then multiply it by 2
 
-    let mut num_visited: i32 = 0;
-    let mut leaf_path = std::collections::HashMap::<i32, i32>::new();
-    let mut collect_center: bool = false;
-    let mut diam_leaves: Vec<i32> = vec![0, 0];
-
+    let mut bfs = std::collections::VecDeque::<i32>::new();
+    let mut num_visited = leaves.len() as i32;
+    let mut look_for_central_nodes = false;
+    let mut central_nodes: Vec::<i32> = vec![];
+    if num_visited > n as i32 - 3 {
+        // println!("looking for central nodes now");
+        look_for_central_nodes = true;
+    }
     for l in &leaves {
         vis.insert(*l);
-        leaf_path.insert(*l, 0);
+        bfs.push_back(*l);
     }
-    num_visited += leaves.len() as i32;
-    if num_visited > n - 3 { collect_center = true; }
-
-    while !leaves.is_empty() {
-
-        println!(
-            "leaves {:?}",
-            leaves
-        );
-
-        let current = leaves.pop_front().unwrap();
-        println!(
-            "current {}",
-            current
-        );
+    let mut two_node_center = false;
+    // println!("------");
+    while !bfs.is_empty() {
+        let current = bfs.pop_front().unwrap();
         for next in &tree[current as usize] {
-            if !vis.contains(&next) {
-
-                println!(
-                    "{} -> {}",
-                    current,
-                    next
-                );
-
-                leaf_path.insert(*next,
-                                 leaf_path[&current] + 1
-                );
-
-                if collect_center == true {
-
-                    println!(
-                        "new guy pushed to diam_leave {}",
-                        leaf_path[&next]
-                    );
-
-                    println!("diam_leaves before processing {:?}",
-                             diam_leaves
-                    );
-
-                    diam_leaves.push(leaf_path[&next]);
-                    diam_leaves.sort();
-                    diam_leaves.swap(0, 2);
-                    diam_leaves.pop();
-
-                    println!("diam_leaves after processing {:?}",
-                             diam_leaves
-                    );
+            if !vis.contains(next) {
+                // println!("{} -> {}", current, *next);
+                if look_for_central_nodes == true {
+                    central_nodes.push(*next);
                 }
-
-                vis.insert(*next);
                 num_visited += 1;
+                vis.insert(*next);
                 bfs.push_back(*next);
-
-                if num_visited > n - 3 {
-
-                    println!(
-                        "number of visited nodes reached the threshold"
-                    );
-
-                    // the next nodes are going to be central
-                    collect_center = true;
+                if num_visited > n as i32 - 3 {
+                    // println!("looking for central nodes now");
+                    look_for_central_nodes = true;
                 }
-
             }
         }
     }
+    /*
     println!(
-        "leaf path {:?}",
-        leaf_path
+        "central nodes {:?}",
+        central_nodes
     );
-    println!(
-        "diam leaves {:?}",
-        diam_leaves
-    );
-    println!(" the result {}", (diam_leaves[0] + diam_leaves[1]) * 3);
+     */
+    if central_nodes.len() == 2 {
+        // we don't really need to know both of them
+        two_node_center = true;
+        central_nodes.pop();
+    }
+    vis = std::collections::HashSet::<i32>::new();
+    bfs = std::collections::VecDeque::<i32>::new();
+    let mut dist_nodes = std::collections::HashMap::<i32, i32>::new();
+    for c in &central_nodes {
+        bfs.push_back(*c);
+        vis.insert(*c);
+        dist_nodes.insert(*c, 0);
+    }
+    // this bfs should arrive at all leaves at the same time
+    while !bfs.is_empty() {
+        let current = bfs.pop_front().unwrap();
+        if tree[current as usize].len() == 1 && vis.contains(&current) {
+            /*
+            println!(
+                "stopped at step {}",
+                dist_nodes[&current]
+            );
+             */
+
+            if two_node_center == true {
+                println!("{}", (dist_nodes[&current] * 2 + 1) * 3);
+            } else {
+                println!("{}", dist_nodes[&current] * 6);
+            }
+            break;
+        }
+
+        for next in &tree[current as usize] {
+            if !vis.contains(next) {
+                bfs.push_back(*next);
+                vis.insert(*next);
+                dist_nodes.insert(
+                    *next,
+                    dist_nodes[&current] + 1
+                );
+            }
+        }
+    }
 }
