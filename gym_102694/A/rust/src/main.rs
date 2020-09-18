@@ -14,7 +14,6 @@ fn read_line_of_i32s() -> Vec<i32> {
 
 fn main() {
     let n = read_line_of_i32s()[0];
-    // it ugly but what can i do? i do not have the input in advance.
     let mut tree: Vec<Vec<i32>> = vec![vec![]; n as usize + 1];
     for i in 0..n - 1 {
         // read the whole line
@@ -60,95 +59,61 @@ fn main() {
             root
         );
     }
-    /*
+
     println!("leaves {:?}",
              leaves
     );
-     */
 
     // second pass
     // find the center, then move from the center to the leaves and
     // measure the distance, then multiply it by 2
 
     let mut bfs = std::collections::VecDeque::<i32>::new();
-    let mut num_visited = leaves.len() as i32;
-    let mut look_for_central_nodes = false;
     let mut central_nodes: Vec::<i32> = vec![];
-    if num_visited > n as i32 - 3 {
-        // println!("looking for central nodes now");
-        look_for_central_nodes = true;
+    let mut bfs_level = std::collections::HashMap::<i32, i32>::new();
+    for leaf in &leaves {
+        bfs.push_back(*leaf);
+        vis.insert(*leaf);
+        bfs_level.insert(
+            *leaf, 0
+        );
     }
-    for l in &leaves {
-        vis.insert(*l);
-        bfs.push_back(*l);
-    }
-    let mut two_node_center = false;
-    // println!("------");
+
+    // collect central nodes
     while !bfs.is_empty() {
         let current = bfs.pop_front().unwrap();
+        println!("vis {} at lvl {}", current, bfs_level[&current]);
+        // update the best level
         for next in &tree[current as usize] {
-            if !vis.contains(next) {
-                // println!("{} -> {}", current, *next);
-                if look_for_central_nodes == true {
-                    central_nodes.push(*next);
-                }
-                num_visited += 1;
-                vis.insert(*next);
-                bfs.push_back(*next);
-                if num_visited > n as i32 - 3 {
-                    // println!("looking for central nodes now");
-                    look_for_central_nodes = true;
-                }
+            if vis.contains(next) {
+                continue
             }
+            println!("discover {} -> {}", current, next);
+            bfs.push_back(*next);
+            vis.insert(*next);
+            bfs_level.insert(
+                *next,
+                bfs_level[&current] + 1
+            );
         }
     }
-    /*
+
+    // collect the central nodes
+    let max_level
+        = bfs_level.values().max().unwrap();
+    for i in &bfs_level {
+        if i.1 == max_level {
+            central_nodes.push(*i.0);
+        }
+    }
+
+    assert!(central_nodes.len() < 3);
+
+    // then move from the central nodes util we reach the end of the tree
+
     println!(
         "central nodes {:?}",
         central_nodes
     );
-     */
-    if central_nodes.len() == 2 {
-        // we don't really need to know both of them
-        two_node_center = true;
-        central_nodes.pop();
-    }
-    vis = std::collections::HashSet::<i32>::new();
-    bfs = std::collections::VecDeque::<i32>::new();
-    let mut dist_nodes = std::collections::HashMap::<i32, i32>::new();
-    for c in &central_nodes {
-        bfs.push_back(*c);
-        vis.insert(*c);
-        dist_nodes.insert(*c, 0);
-    }
-    // this bfs should arrive at all leaves at the same time
-    while !bfs.is_empty() {
-        let current = bfs.pop_front().unwrap();
-        if tree[current as usize].len() == 1 && vis.contains(&current) {
-            /*
-            println!(
-                "stopped at step {}",
-                dist_nodes[&current]
-            );
-             */
 
-            if two_node_center == true {
-                println!("{}", (dist_nodes[&current] * 2 + 1) * 3);
-            } else {
-                println!("{}", dist_nodes[&current] * 6);
-            }
-            break;
-        }
-
-        for next in &tree[current as usize] {
-            if !vis.contains(next) {
-                bfs.push_back(*next);
-                vis.insert(*next);
-                dist_nodes.insert(
-                    *next,
-                    dist_nodes[&current] + 1
-                );
-            }
-        }
-    }
 }
