@@ -59,10 +59,11 @@ fn main() {
             root
         );
     }
-
+    /*
     println!("leaves {:?}",
              leaves
     );
+     */
 
     // second pass
     // find the center, then move from the center to the leaves and
@@ -82,13 +83,13 @@ fn main() {
     // collect central nodes
     while !bfs.is_empty() {
         let current = bfs.pop_front().unwrap();
-        println!("vis {} at lvl {}", current, bfs_level[&current]);
+        // println!("vis {} at lvl {}", current, bfs_level[&current]);
         // update the best level
         for next in &tree[current as usize] {
             if vis.contains(next) {
                 continue
             }
-            println!("discover {} -> {}", current, next);
+            // println!("discover {} -> {}", current, next);
             bfs.push_back(*next);
             vis.insert(*next);
             bfs_level.insert(
@@ -109,11 +110,24 @@ fn main() {
 
     assert!(central_nodes.len() < 3);
 
-    // then move from the central nodes util we reach the end of the tree
-
+    /*
     println!(
         "central nodes {:?}",
         central_nodes
     );
+     */
 
+    // todo1 most probably, the problem is that i never looked at # adjacent nodes
+    // that the central nodes have.
+    // todo2 - calculate the diameter as the longest path and compare with the thngs
+    // u obtained from the central walk - they must be equal to each other.
+    if central_nodes.len() == 1 {
+        println!("{}",
+                 (max_level * 2) * 3
+        );
+    } else {
+        println!("{}",
+                 (max_level * 2 + 1) * 3
+        );
+    }
 }
