@@ -1,0 +1,35 @@
+
+A
+a
+   b [...] C
+B
+
+here is a sample graph:
+Clearly, the diameter lies somewhere between 2 leaves. Proved by contrary.
+A-a, a-b, B-b, b-[...]-C.
+Clearly, the longest path is from A to C. It is the diameter.
+Contructively. If we are lucky, we may start looking from leaf A, and
+run BFS until we reach C and get the result at once. But suppose we are
+not and we start from B. Then we will still arrive at the most distant
+node C (for this example, suppose [...] represents infinite amount of
+nodes). We then update the answer by moving from C with the same BFS and
+selecting A. Will this algorithm always work? Suppose not. So there is
+a node A' such that the distance from A' to C is the longest. Then if we
+run BFS from A', we reach C as the furthest node. But then if we run
+from C, which we already did and found A along the way, was wrong, because
+for A should now be the furthest node from C, but we claim that A' is, and
+A' is not A. Okay, so GIVEN C is one part of the pair, we found that A is
+GUARANTEED to be the other part of the pair.
+
+Why is C necessarily a part of the diameter nodes?
+
+Suppose the diametral path is already marked somehow. Suppose we select
+a random node from one side of it. We will travel all of the edges in the
+tree using BFS, so we will have something common with the diametral path.
+We cannot avoid it. We will defnintely intersect it, but will only follow
+it in one direction. So on entering the path we will be guaranteed to
+follow it, as by defniniton at that point where we enter it, our best
+option is to move along the highlighted path, as it brings us to the
+furthest node from that point. Okay, here is the thing. Okay, so on
+arrival to the furthest such a node we already have one part of the
+answer. Then we apply the argument by contradictino to finish the proof.

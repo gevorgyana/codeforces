@@ -26,12 +26,6 @@ fn main() {
         return;
     }
 
-    // if we need the longest possible distance, then we might better
-    // then it might probably make sense to start from a leaf. because
-    // it makes no sense to start
-
-    // find the leaves
-    let mut leaves = std::collections::VecDeque::<i32>::new();
     let mut root = -1;
     for (i, val) in tree.iter().enumerate() {
         if !val.is_empty() {
@@ -39,55 +33,58 @@ fn main() {
             break;
         }
     }
+
     let mut vis = std::collections::HashSet::<i32>::new();
     let mut bfs = std::collections::VecDeque::<i32>::new();
-    bfs.push_back(root);
+    let mut lvl = std::collections::HashMap::<i32, i32>::new();
     vis.insert(root);
+    bfs.push_back(root);
+    lvl.insert(root, 0);
+    let mut furthest_node: (i32, i32) = (-1, -1);
     while !bfs.is_empty() {
         let current = bfs.pop_front().unwrap();
-        let mut is_leaf = true;
+        // println!("{} with lvl {}", current, lvl[&current]);
         for next in &tree[current as usize] {
             if !vis.contains(next) {
-                is_leaf = false;
-                vis.insert(*next);
                 bfs.push_back(*next);
-            }
-        }
-        if is_leaf == true {
-            leaves.push_back(current);
-        }
-    }
-    if tree[root as usize].len() == 1 {
-        leaves.push_back(tree[root as usize][0]);
-    }
-
-    let mut longest_dist = i32::min_value();
-    // then tranverse the whole tree starting from the leaves
-    for root in &leaves {
-        let mut vis = std::collections::HashSet::<i32>::new();
-        let mut bfs = std::collections::VecDeque::<i32>::new();
-        let mut lvl = std::collections::HashMap::<i32, i32>::new();
-        bfs.push_back(*root);
-        vis.insert(*root);
-        lvl.insert(*root, 0);
-        while !bfs.is_empty() {
-            let current = bfs.pop_front().unwrap();
-            longest_dist = longest_dist.max(lvl[&current]);
-            for next in &tree[current as usize] {
-                if !vis.contains(next) {
-                    vis.insert(*next);
-                    bfs.push_back(*next);
-                    lvl.insert(
-                        *next,
-                        lvl[&current] + 1
-                    );
+                vis.insert(*next);
+                lvl.insert(
+                    *next,
+                    lvl[&current] + 1
+                );
+                if furthest_node.0 < lvl[next] {
+                    furthest_node.0 = lvl[next];
+                    furthest_node.1 = *next;
                 }
             }
         }
     }
 
+    root = furthest_node.1;
+
+    let mut vis = std::collections::HashSet::<i32>::new();
+    let mut bfs = std::collections::VecDeque::<i32>::new();
+    let mut lvl = std::collections::HashMap::<i32, i32>::new();
+    vis.insert(root);
+    bfs.push_back(root);
+    lvl.insert(root, 0);
+    let mut ans = 0;
+    while !bfs.is_empty() {
+        let current = bfs.pop_front().unwrap();
+        ans = ans.max(lvl[&current]);
+        for next in &tree[current as usize] {
+            if !vis.contains(next) {
+                bfs.push_back(*next);
+                vis.insert(*next);
+                lvl.insert(
+                    *next,
+                    lvl[&current] + 1
+                );
+            }
+        }
+    }
     println!(
         "{}",
-        longest_dist * 3
+        ans * 3
     );
 }
