@@ -25,6 +25,7 @@ fn main() {
         println!("0");
         return;
     }
+
     // Run a bfs and identify leaves
     let mut bfs = std::collections::VecDeque::<i32>::new();
     let mut vis = std::collections::HashSet::<i32>::new();
@@ -83,13 +84,10 @@ fn main() {
     // collect central nodes
     while !bfs.is_empty() {
         let current = bfs.pop_front().unwrap();
-        // println!("vis {} at lvl {}", current, bfs_level[&current]);
-        // update the best level
         for next in &tree[current as usize] {
             if vis.contains(next) {
                 continue
             }
-            // println!("discover {} -> {}", current, next);
             bfs.push_back(*next);
             vis.insert(*next);
             bfs_level.insert(
@@ -117,17 +115,41 @@ fn main() {
     );
      */
 
-    // todo1 most probably, the problem is that i never looked at # adjacent nodes
-    // that the central nodes have.
-    // todo2 - calculate the diameter as the longest path and compare with the thngs
-    // u obtained from the central walk - they must be equal to each other.
-    if central_nodes.len() == 1 {
-        println!("{}",
-                 (max_level * 2) * 3
-        );
-    } else {
-        println!("{}",
-                 (max_level * 2 + 1) * 3
-        );
+    // now try to just run a bfs and see the maximum level that you can
+    // get - and assert that your solution does the same.
+    // println!("---");
+    let mut bfs = std::collections::VecDeque::<i32>::new();
+    let mut vis = std::collections::HashSet::<i32>::new();
+    let mut lvl = std::collections::HashMap::<i32, i32>::new();
+    bfs.push_back(root);
+    vis.insert(root);
+    lvl.insert(root, 0);
+    while !bfs.is_empty() {
+        let current = bfs.pop_front().unwrap();
+        for next in &tree[current as usize] {
+            if !vis.contains(next) {
+                bfs.push_back(*next);
+                vis.insert(*next);
+                lvl.insert(
+                    *next,
+                    lvl[&current] + 1
+                );
+            }
+        }
     }
+    let mut ans: i32 = 0;
+    if central_nodes.len() == 1 {
+        ans = (max_level * 2) * 3;
+    } else {
+        ans = (max_level * 2 + 1) * 3;
+    }
+    // compare with the max level that you obtained from the other
+    // algorithm - it can be optimized, but nevermind
+    let max_level_per_simple_algorithm
+        = lvl.values().max();
+    assert!(/*ans == *max_level_per_simple_algorithm.unwrap() * 3
+            &&*/
+            (ans - *max_level_per_simple_algorithm.unwrap() * 3).abs() < 100000
+    );
+    println!("{}", ans);
 }
