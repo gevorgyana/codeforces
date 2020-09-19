@@ -32,55 +32,14 @@ fn main() {
         println!("0");
         return;
     }
-    let mut best_ans = i32::min_value();
-    for root in nodes {
-        let mut bfs = std::collections::VecDeque::<i32>::new();
-        let mut vis = std::collections::HashSet::<i32>::new();
-        let mut lvl = std::collections::HashMap::<i32, i32>::new();
-        bfs.push_back(root);
-        vis.insert(root);
-        lvl.insert(root, 0);
-        while !bfs.is_empty() {
-            let current = bfs.pop_front().unwrap();
-            let current_lvl = lvl[&current];
-            // println!("current {} : lvl {}", current, current_lvl);
-            for next in &tree[current as usize] {
-                if !vis.contains(next) {
-                    bfs.push_back(*next);
-                    vis.insert(*next);
-                    lvl.insert(
-                        *next,
-                        lvl[&current] + 1
-                    );
-                }
-            }
-        }
-        /*
-        println!(
-            "{:?}",
-            lvl
-        );
-         */
-        /*
-        let max_level_per_simple_algorithm
-            = lvl.values().max();
-        println!("{}", *max_level_per_simple_algorithm.unwrap() * 3);
-         */
-        best_ans = best_ans.max(*lvl.values().max().unwrap() * 3);
-    }
 
-    println!(
-        "{}",
-        best_ans
-    );
+    // locate the leaves of the tree,
+    // then locate the center of the tree
+    // then move from the center to the leaves, and calculate the distance
+    // we have covered all the paths - so if we sum the
 
-    /*
-    the diameter is the longest path between any 2 nodes
-    we can use the defininton. take every node, and run bfs from it
-    so in N ^ 2 time we will find the answer by contantly updating it.
-    we could also find just the central nodes, and from them walk all
-    the way down the tree. would it work? if we have a center and we run
-    from the center, then it should work. let's check that.
-     */
-
+    // diameter is the longest thing - if we start from the center, we
+    // minimize the distances. diameter is the maximum distance. so
+    // we need a metric contrary to the central distance. central distance
+    // is the minimum distance.
 }
