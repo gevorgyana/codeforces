@@ -1,0 +1,19 @@
+root - best root to maximize diameter?
+. . . x = 3
+-----------
+. . .   = 2
+  x
+
+the transformation will increase only one path a time by 1. the diameter
+is the longest path, can there be many such paths? yes - a *-like graph
+serves as an example. so there are 2 cases:
+
+- increase the diameter - in this case increase it by 1 - we need to find
+all the diametral leaves and if we add a node to
+them, the diameter increases by 1;
+- increase a non-diametral path - in this case it reaches length <=
+diametral length, so we still return the diameter of the tree.
+
+Use BFS to find all the diameters. First pass: reached X nodes, second
+pass: reached Y nodes => X * Y possibilities to select the diameter, and
+we know all of them.
